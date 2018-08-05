@@ -141,9 +141,19 @@ for v in sine_wave:
 	else:
 		square_wave.append(-1)
 
+saw_range = abs(
+	real_y_to_screen_y(1,ymin,ymax) 
+	- real_y_to_screen_y(-1,ymin,ymax)
+)
+sawtooth_wave = np.linspace(-1, 1, saw_range)
+
+triangle_wave = np.abs(sawtooth_wave) * 2 - 1
+
 equations = {
 	'sine': sine_wave,
-	'square': square_wave
+	'square': square_wave,
+	'saw': sawtooth_wave,
+	'triangle': triangle_wave
 }
 
 for name, equation in equations.items():
