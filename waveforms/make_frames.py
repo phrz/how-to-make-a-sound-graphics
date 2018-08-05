@@ -22,7 +22,7 @@ ymax = 1.4
 xmin = -1.95
 xmax = 1.95
 
-screen = pygame.display.set_mode(size)
+# screen = pygame.display.set_mode(size)
 surf = pygame.Surface(size)
 
 font = pygame.font.Font('../pixelmix-8px.ttf', 8)
@@ -133,20 +133,17 @@ def list_plot_frames(size, ls, bx, p, move_speed=1):
 	# number of frames
 	return len(ls)
 
-# make the output directory
-try:
-	os.mkdir('out')
-except FileExistsError:
-	pass
+sine_wave = np.sin(np.linspace(0, math.tau, 100))[1:]
+square_wave = []
+for v in sine_wave:
+	if v > 0:
+		square_wave.append(1)
+	else:
+		square_wave.append(-1)
 
-# make the raw frames directory
-try:
-	os.mkdir('frames')
-except FileExistsError:
-	pass
-	
 equations = {
-	'sine': np.sin(np.linspace(0, math.tau, 100))[1:]
+	'sine': sine_wave,
+	'square': square_wave
 }
 
 for name, equation in equations.items():
