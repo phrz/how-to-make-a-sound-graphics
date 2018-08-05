@@ -7,12 +7,16 @@ import subprocess
 
 pygame.init()
 
-background_color = (211,255,252)
-line_color = (74,129,255)
-text_color = (255,255,255)
+# original (powder blue background, blue lines)
+# background_color = (211,255,252)
+# line_color = (74,129,255)
+# x_axis_color = (142,179,163)
+# y_axis_color = (175,230,226)
 
-x_axis_color = (142,179,163)
-y_axis_color = (175,230,226)
+# blueprint (blue background, robin's egg lines)
+background_color = (74,129,255)
+line_color =  (211,255,252)
+x_axis_color = y_axis_color = (175,230,226)
 
 size = (356, 255)
 
@@ -60,9 +64,13 @@ def h_tick(surf, x, y, color, content):
 		(x0 - l, y0)
 	)
 	text(surf, content, x0 + l + 4, y0 - 4, color)
-	
+
+def watermark(surf):
+	text(surf, 'paulherz.com', size[0]-70, size[1]-15, x_axis_color)
+
 def graph_background(surf):
 	surf.fill(background_color)
+	watermark(surf)
 	# solid y-axis line
 	mid = int(round(size[0] / 2))
 	pygame.draw.line(
