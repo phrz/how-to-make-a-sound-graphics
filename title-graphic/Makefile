@@ -7,6 +7,9 @@ setup:
 folders:
 	mkdir -p out
 
+preview:
+	pipenv run python3 make_graphic.py --preview
+
 out/title-unoptimized.png: folders
 	pipenv run python3 make_graphic.py
 
