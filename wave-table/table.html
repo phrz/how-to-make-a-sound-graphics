@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>three.js</title>
+		<style>
+			body{background:#000;margin:0;overflow:hidden}
+			canvas{height:100%;margin:auto;display:block}
+		</style>
+	</head>
+	<body>
+		<script src="three.js"></script>
+		<script src="orbit.js"></script>
+		<script>
+			const backgroundColor = 0x4048A1;
+			const wireframeColor = 0xF1EB7D;
+			const legHeight = 6;
+			const tableX = 10;
+			const tableZ = 15;
+			const legSize = 1;
+			const tableThickness = 0.7;
+			const wireframe = true;
+
+			// SETUP
+
+			var scene = new THREE.Scene();
+
+			var nearClip = 0.1;
+			var farClip = 1000;
+			// var aspectRatio = window.innerWidth / window.innerHeight;
+			var aspectRatio = 1;
+
+			// FOV (degrees), aspect ratio, near clipping plane, far clipping plane
+			const perspDistance = 20;
+			var camera = new THREE.PerspectiveCamera(
+				perspDistance, 
+				window.innerWidth / window.innerHeight,
+				nearClip, 
+				farClip
+			);
+			camera.position.set(30,20,30);
+			camera.lookAt(0,0,0);
+
+			var controls = new THREE.OrbitControls( camera );
+			controls.update();
+			
+			
+			// const distance = 10;
+			// var camera = new THREE.OrthographicCamera(
+			// 	-distance * aspectRatio, // left
+			// 	distance * aspectRatio,  // right
+			// 	distance,                // top
+			// 	-distance,               // bottom
+			// 	nearClip,
+			// 	farClip
+			// );
+			// const tilt = 500;
+			// // center point of the table
+			// const center = [(tableX)/2, 0, (tableZ)/2];
+			// camera.position.set(tilt+center[0],-1*(tilt+center[1]),tilt+center[2]);
+			// camera.lookAt(center[0], center[1], center[2]);
+
+			var renderer = new THREE.WebGLRenderer();
+			renderer.setClearColor( backgroundColor, 1 );
+			// renderer.setSize(window.innerWidth, window.innerHeight);
+			renderer.setSize(window.innerHeight, window.innerHeight);
+			document.body.appendChild(renderer.domElement);
+
+			function makeWireframeBox(hd=false) {
+
+				// hd == high number of segmentation for table top (warping)
+				if(hd) {
+					var geometry = new THREE.BoxGeometry(1, 1, 1, 10, 1, 10);
+				} else {
+					var geometry = new THREE.BoxGeometry(1, 1, 1);
+				}
+				
+
+				if(wireframe) {
+					var material = new THREE.MeshBasicMaterial({ color: wireframeColor });
+					material.wireframe = true;
+				} else {
+					var material = new THREE.MeshPhongMaterial({ color: wireframeColor });
+				}
+
+				var box = new THREE.Mesh(geometry, material);
+				return box;
+			}
+
+			function makeTableLeg() {
+				let tableLeg = makeWireframeBox();
+				tableLeg.scale.set(legSize, legHeight, legSize);
+				return tableLeg;
+			}
+
+			function makeTableTop() {
+				let tableTop = makeWireframeBox(true);
+				tableTop.scale.set(tableX, tableThickness, tableZ);
+				return tableTop;
+			}
+
+			function makeTable() {
+				let table = new THREE.Object3D();
+
+				// make four differently positioned legs
+				let baseLeg = makeTableLeg();
+				let tableLegs = [];
+				for(let i = 0; i < 4; i++) {
+					tableLegs.push(baseLeg.clone());
+				}
+				tableLegs[0].position.set(0, 0, 0);
+				tableLegs[1].position.set(tableX - legSize, 0, 0);
+				tableLegs[2].position.set(tableX - legSize, 0, tableZ - legSize);
+				tableLegs[3].position.set(0, 0, tableZ - legSize);
+
+				for(let tableLeg of tableLegs) {
+					table.add(tableLeg);
+				}
+
+				let tableTop = makeTableTop();
+				tableTop.position.set(
+					(tableX - legSize)/2,
+					(legHeight + tableThickness)/2,
+					(tableZ - legSize)/2
+				);
+				table.add(tableTop);
+
+				// fix rotational origin
+				table.position.set(
+					(legSize - tableX) / 2, 
+					0,
+					(legSize - tableZ) /2
+				);
+
+				return table;
+			}
+
+			let table = makeTable();
+			scene.add(table);
+
+			let ax = new THREE.AxesHelper(8);
+			scene.add(ax);
+
+			var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+			pointLight.position.set( 20, 20, 20 );
+			scene.add( pointLight );
+
+			// RENDER LOOP
+			function animate() {
+				requestAnimationFrame(animate);
+
+				// scene.rotation.y += 0.01;
+				controls.update();
+
+				renderer.render(scene, camera);
+			}
+			animate();
+		</script>
+	</body>
+</html>
