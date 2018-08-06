@@ -1,3 +1,5 @@
+# WAVEFORMS
+
 default: animated_gifs
 
 setup:
@@ -15,7 +17,7 @@ frames: folders
 crushed_frames: frames
 	sh crush_frames.sh
 
-animated_pngs: crushed_frames
+animated_pngs: frames
 	sh make_apngs.sh
 
 animated_gifs: animated_pngs

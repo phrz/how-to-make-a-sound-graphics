@@ -5,7 +5,7 @@ BLOBS_TARGET="table_frames.txt"
 default: animated_gif
 
 setup:
-	brew install apng2gif pngcrush
+	brew install apng2gif parallel
 	pip3 install --user pipenv
 
 folders:
@@ -18,10 +18,7 @@ ${BLOBS_TARGET}: folders
 frames: ${BLOBS_TARGET} folders
 	pipenv run python3 blobs_to_files.py
 
-crushed_frames: frames
-	sh crush_frames.sh
-
-animated_png: crushed_frames
+animated_png: frames
 	sh make_apng.sh
 
 animated_gif: animated_png

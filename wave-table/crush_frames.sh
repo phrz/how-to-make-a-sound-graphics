@@ -1,1 +1,0 @@
-pngcrush -d frames/crushed frames/*.png
