@@ -14,9 +14,6 @@ folders:
 frames: folders
 	pipenv run python3 make_frames.py
 
-crushed_frames: frames
-	sh crush_frames.sh
-
 animated_pngs: frames
 	sh make_apngs.sh
 
