@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>three.js</title>
+		<style>
+			body{width:100%;background:#fff;margin:0;overflow:hidden}
+			canvas{margin:auto;display:block;image-rendering:pixelated}
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script src="js/orbit.js"></script>
+
+		<script>
+			let animationTime = 0;
+			// it's square.
+			const renderSize = 500;
+			const wireframeColor = 0xff145b;
+
+			const wireframe = true;
+			const isometric = true;
+
+			// GIF/APNG related
+			const framesToRecord = 50;
+
+			// SETUP
+
+			var scene = new THREE.Scene();
+
+			var nearClip = 0.1;
+			var farClip = 1000;
+			var aspectRatio = 1;
+
+			// FOV (degrees), aspect ratio, near clipping plane, far clipping plane
+			if(!isometric) {
+				const perspectiveFOV = 30;
+				var camera = new THREE.PerspectiveCamera(
+					perspectiveFOV, 
+					aspectRatio,
+					nearClip, 
+					farClip
+				);
+				camera.position.set(30,30,30);
+				var controls = new THREE.OrbitControls( camera );
+				controls.update();
+			} else {
+				const distance = 10;
+				var camera = new THREE.OrthographicCamera(
+					-distance * aspectRatio, // left
+					distance * aspectRatio,  // right
+					distance,                // top
+					-distance,               // bottom
+					nearClip,
+					farClip
+				);
+				const tilt = 15;
+				const center = [0,0,0];
+				camera.position.set(tilt+center[0],tilt+center[1],tilt+center[2]);
+			}
+
+			camera.lookAt(0,0,0);
+
+			var renderer = new THREE.WebGLRenderer({
+				preserveDrawingBuffer: true,
+				alpha: true
+			});
+			renderer.setClearColor(0x000000, 0);
+			renderer.setSize(renderSize,renderSize);
+			document.body.appendChild(renderer.domElement);
+
+			function makeSphere() {
+				const radius = 5;
+				const wSeg = 16;
+				const hSeg = 16;
+				var geometry = new THREE.SphereGeometry(radius, wSeg, hSeg);
+				
+				if(wireframe) {
+					var material = new THREE.MeshBasicMaterial({ color: wireframeColor });
+					material.wireframe = true;
+				} else {
+					var material = new THREE.MeshPhongMaterial({ color: wireframeColor });
+				}
+
+				var sphere = new THREE.Mesh(geometry, material);
+				return sphere;
+			}
+
+			let sphere = makeSphere();
+			scene.add(sphere);
+
+			// let ax = new THREE.AxesHelper(8);
+			// scene.add(ax);
+
+			// phong shader needs light
+			if(!wireframe) {
+				var pointLight = new THREE.PointLight( 0xffffff, 1, 100 );
+				pointLight.position.set( 20, 20, 20 );
+				scene.add( pointLight );
+			}
+
+			// RENDER LOOP
+			const tStep = (2 * Math.PI) / framesToRecord;
+			let frameNumber = 0;
+			let frameOutput = '';
+			let hasPrintedFrames = false;
+
+			function animate() {
+				requestAnimationFrame(animate);
+
+				if(!isometric) {
+					controls.update();
+				}
+
+				renderer.render(scene, camera);
+
+				let x = frameNumber * tStep;
+				let yScale = (Math.sin(x) + 1)/3 + (1/3);
+
+				sphere.position.y = 4 * Math.sin(x);
+				sphere.scale.set(1, yScale, 1);
+
+				if(frameNumber < framesToRecord) {
+					let dataUrl = renderer.domElement.toDataURL("image/png");
+					frameOutput += "|";
+					frameOutput += dataUrl;
+				} else {
+					if(!hasPrintedFrames) {
+						hasPrintedFrames = true;
+						// console.log(frameOutput);
+						fetch('http://localhost:3333', {
+							mode: 'no-cors',
+							method: 'post',
+							headers: {
+								'Content-Type': 'text/plain'
+							},
+							body: frameOutput
+						}).then((res) => {
+							console.log('Done');
+						});
+					}
+				}
+
+				frameNumber++;
+			}
+			animate();
+		</script>
+	</body>
+</html>
