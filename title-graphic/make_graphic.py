@@ -6,26 +6,29 @@ import json
 
 preview_mode = '--preview' in sys.argv[1:]
 
-if not preview_mode and len(sys.argv) != 3:
+if (not preview_mode and len(sys.argv) != 4) or \
+(preview_mode and len(sys.argv) != 3):
 	print('''
 	usage: 
-	make_graphic.py [audio_file] [out_file]
+	make_graphic.py [font_file] [audio_file] [out_file]
 	    
 	    generates an image of the waveform with text annotation and saves to
 	    a PNG file.
-
+	
+		font_file: the pixel font in TTF format
 	    audio_file: a raw, unsigned 8-bit audio waveform at 8000Hz sample rate
 	    out_file:   the location to save the waveform image to.
 
-	make_graphic.py --preview
+	make_graphic.py [font_file] --preview
 
 	    previews the graphic in a window without committing to file.
 	''')
 elif not preview_mode:
-	in_file_name = sys.argv[1]
-	out_file_name = sys.argv[2]
+	audio_file_name, out_file_name = sys.argv[2:]
 
-with open(in_file_name,'rb') as f:
+font_file_name = sys.argv[1]
+
+with open(audio_file_name,'rb') as f:
 	samples = f.read()
 
 pygame.init()
@@ -55,7 +58,7 @@ surf.fill(background_color)
 
 # load the bitmap font
 font = pygame.font.Font(
-	os.path.join(os.getcwd(), '../pixelmix-8px.ttf'), 16
+	os.path.normpath(os.path.join(os.getcwd(), font_file_name)), 16
 )
 
 # print the spoken text transcript to screen

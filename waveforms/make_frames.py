@@ -2,8 +2,15 @@ import pygame, sys, math
 import pygame.draw, pygame.font
 from PIL import Image
 import numpy as np
-import os
+import os, os.path
 import subprocess
+
+if len(sys.argv) != 3:
+	print('usage: make_frames.py [font_file] [frames_dir]')
+	exit(1)
+
+# pixelmix-8px.ttf waveforms/frames/
+font_file_name, frames_dir = sys.argv[1:]
 
 pygame.init()
 
@@ -29,7 +36,7 @@ xmax = 1.95
 # screen = pygame.display.set_mode(size)
 surf = pygame.Surface(size)
 
-font = pygame.font.Font('../pixelmix-8px.ttf', 8)
+font = pygame.font.Font(font_file_name, 8)
 
 def map_range(value, in_min, in_max, out_min, out_max):
 	slope = (out_max - out_min) / (in_max - in_min)
@@ -166,7 +173,7 @@ equations = {
 
 for name, equation in equations.items():
 	# make raw frames
-	list_plot_frames(size, equation, 0, f'frames/{name}', move_speed=2)
+	list_plot_frames(size, equation, 0, os.path.join(frames_dir, name), move_speed=2)
 """
 while True:
 	for event in pygame.event.get():
