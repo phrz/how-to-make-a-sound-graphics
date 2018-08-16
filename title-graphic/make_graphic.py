@@ -4,7 +4,28 @@ from PIL import Image
 import os.path, sys
 import json
 
-with open('howtomakeasound-u8-8000hz.raw','rb') as f:
+preview_mode = '--preview' in sys.argv[1:]
+
+if not preview_mode and len(sys.argv) != 3:
+	print('''
+	usage: 
+	make_graphic.py [audio_file] [out_file]
+	    
+	    generates an image of the waveform with text annotation and saves to
+	    a PNG file.
+
+	    audio_file: a raw, unsigned 8-bit audio waveform at 8000Hz sample rate
+	    out_file:   the location to save the waveform image to.
+
+	make_graphic.py --preview
+
+	    previews the graphic in a window without committing to file.
+	''')
+elif not preview_mode:
+	in_file_name = sys.argv[1]
+	out_file_name = sys.argv[2]
+
+with open(in_file_name,'rb') as f:
 	samples = f.read()
 
 pygame.init()
@@ -18,10 +39,7 @@ background_color = (0,0,0)
 line_color = (200,200,200)
 text_color = (255,255,255)
 
-# load some basic project-wide parameters from file
-with open('../settings.json') as json_data:
-	settings = json.load(json_data)
-	size = (settings['width'], settings['height'])
+size = (500, 358)
 
 # positive numbers move the chart down
 # (approximately center on screen by taking half of canvas
@@ -61,7 +79,6 @@ for x, chunk in enumerate(chunks):
 	mn, mx = min(chunk), max(chunk)
 	pygame.draw.line(surf, line_color, (x, mn), (x, mx))
 
-preview_mode = '--preview' in sys.argv[1:]
 if preview_mode:
 	# show the image rendered in a window
 	screen = pygame.display.set_mode(size)
@@ -75,4 +92,4 @@ else:
 	# save the photo to file
 	data = pygame.image.tostring(surf, 'RGB')
 	img = Image.frombytes('RGB', size, data)
-	img.save('out/title-unoptimized.png', 'PNG')
+	img.save(out_file_name, 'PNG')
